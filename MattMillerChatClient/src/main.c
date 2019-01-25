@@ -16,7 +16,11 @@
  *  persisted despite not actually being a problem. Issue was resolved via a power cycle
  *  and coping the code over to a new project.
  *
+ *  perror manual and example: https://www.tutorialspoint.com/c_standard_library/c_function_perror.htm
  *
+ *	printf with variable example and help: https://stackoverflow.com/questions/16675287/printf-a-variable-in-c
+ *
+ *	scanf help: https://en.wikibooks.org/wiki/C_Programming/Simple_input_and_output
  */
 
 
@@ -38,36 +42,59 @@ int main(){
 	int status;
 	int descriptor;
 	char name[7]; //allocating memory for screen name
-	char message[80]; //allocating memory for message
-//	char *name = malloc(80);
-//	bzero(name,sizeof(name));
-//	bcopy(src,dst,nchars);
+	char message[80], serverReply[80]; //allocating memory for message
+	/*
+	* 	char *name = malloc(80);
+	*	bzero(name,sizeof(name));
+	*	bcopy(src,dst,nchars);
+	*/
 
 	//Opening the socket
 	descriptor = socket(PF_INET,SOCK_STREAM, 0); //opens the socket
 	if(descriptor == -1){
-		printf("Socket not created successfully");
+		perror("Socket not created successfully");
+		return 1;
 	}
 	puts("Socket Created\n");
 
 	//Connecting to the server
-	int sockFileDesc = socket(AF_INET, SOCK_STREAM, 0);
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET; //convention
 	server.sin_port = htons( 49153 ); //49153 is at the beginning of the dynamic/private range of ports. It is a TCP port.
 	inet_pton(AF_INET, "10.115.20.250", &server.sin_addr);
-	status=connect(sockFileDesc, (const struct sockaddr *) &server, sizeof(server));
+	status=connect(sockfd, (const struct sockaddr *) &server, sizeof(server));
 	if(status < 0){
 		perror("Connection failed. Error");
 		return 1;
 	}
 	puts("Connected\n");
 
+	//Ask for username and then pass it to the server
+	puts("Enter Username:");
+	scanf("%s", name);
+	send(sockfd, name, strlen(name),0);
 
 	//Staying connected to the server until done.
-	/*
-	 * while(1){
+	while(1){
 		printf("Enter Message : ");
 		scanf("%s", message);
+
+		//send it
+		if(send(sockfd, message, strlen(message),0)<0){
+			puts("Failed to send message\n");
+			return 1;
+		}
+		//check for and receive reply
+		if(recv(sockfd, serverReply, 80, 0) < 0){
+			puts("Failed to get new messages\n");
+			return 1;
+		}
+		//
+		puts("They say");
+		puts(serverReply);
 	}
-	*/
+
+	close(sockfd);
+	return 0;
+
 }
