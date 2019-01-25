@@ -33,16 +33,20 @@ int main(){
 /* The first part of the code here is used to connect to the port, family, and socket
  * of the server. It also checks the status of the server.
  */
-	struct sockaddr_in server;
+	struct sockaddr_in rodServer; //rodServer is the struct for the server I'm connecting to
 	int status;
+	int descriptor;
+	char *name = malloc(80);//allocating memory
+	bzero(name,sizeof(name));
+	//bcopy(src,dst,nchars);
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	server.sin_family = AF_INET;
-	server.sin_port = htons(49153);
-	inet_pton(AF_INET, "10.115.20.250", &server.sin_addr);
-	status=connect(sockfd, (const struct sockaddr *) &server, sizeof(server));
+	rodServer.sin_family = AF_INET;
+	rodServer.sin_port = htons(49153);//49153 is at the beginning of the dynamic/private range of ports. It is a TCP port.
+	inet_pton(AF_INET, "10.115.20.250", &rodServer.sin_addr);
+	status=connect(sockfd, (const struct sockaddr *) &rodServer, sizeof(rodServer));
 	printf("Connected, status=%d\n",status);
-	connect(sockfd, (const struct sockaddr *) &server, sizeof(server));
 
-
+	//opening the socket
+	descriptor = socket(PF_INET,SOCK_STREAM, PF_INET);
 
 }
