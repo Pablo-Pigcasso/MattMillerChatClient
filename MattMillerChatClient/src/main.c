@@ -37,26 +37,37 @@ int main(){
 	struct sockaddr_in server; //rodServer is the struct for the server I'm connecting to
 	int status;
 	int descriptor;
-	char name[7]; //allocating memory
+	char name[7]; //allocating memory for screen name
+	char message[80]; //allocating memory for message
 //	char *name = malloc(80);
 //	bzero(name,sizeof(name));
 //	bcopy(src,dst,nchars);
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+	//Opening the socket
+	descriptor = socket(PF_INET,SOCK_STREAM, 0); //opens the socket
+	if(descriptor == -1){
+		printf("Socket not created successfully");
+	}
+	puts("Socket Created\n");
+
+	//Connecting to the server
+	int sockFileDesc = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET; //convention
 	server.sin_port = htons( 49153 ); //49153 is at the beginning of the dynamic/private range of ports. It is a TCP port.
 	inet_pton(AF_INET, "10.115.20.250", &server.sin_addr);
-	status=connect(sockfd, (const struct sockaddr *) &server, sizeof(server));
+	status=connect(sockFileDesc, (const struct sockaddr *) &server, sizeof(server));
 	if(status < 0){
 		perror("Connection failed. Error");
 		return 1;
 	}
 	puts("Connected\n");
 
-	//opening the socket
-	descriptor = socket(PF_INET,SOCK_STREAM, 0); //opens the socket
-	if(descriptor == -1){
-		printf("Socket not created successfully");
-	}
-	puts("Socket created");
 
+	//Staying connected to the server until done.
+	/*
+	 * while(1){
+		printf("Enter Message : ");
+		scanf("%s", message);
+	}
+	*/
 }
