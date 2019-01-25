@@ -21,32 +21,42 @@
 
 
 #include <stdio.h>
-#include <arpa/inet.h>
+#include <arpa/inet.h> //inet and others
 #include <netinet/in.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
+#include <sys/socket.h> //sockets
+#include <unistd.h> //write
+#include <errno.h> //allows me to use errors
+#include <string.h> //gives length of strings
 
 int main(){
 /* The first part of the code here is used to connect to the port, family, and socket
  * of the server. It also checks the status of the server.
  */
-	struct sockaddr_in rodServer; //rodServer is the struct for the server I'm connecting to
+	//initial connection with the server
+	struct sockaddr_in server; //rodServer is the struct for the server I'm connecting to
 	int status;
 	int descriptor;
-	char *name = malloc(80);//allocating memory
-	bzero(name,sizeof(name));
-	//bcopy(src,dst,nchars);
+	char name[7]; //allocating memory
+//	char *name = malloc(80);
+//	bzero(name,sizeof(name));
+//	bcopy(src,dst,nchars);
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	rodServer.sin_family = AF_INET;
-	rodServer.sin_port = htons(49153);//49153 is at the beginning of the dynamic/private range of ports. It is a TCP port.
-	inet_pton(AF_INET, "10.115.20.250", &rodServer.sin_addr);
-	status=connect(sockfd, (const struct sockaddr *) &rodServer, sizeof(rodServer));
-	printf("Connected, status=%d\n",status);
+	server.sin_family = AF_INET; //convention
+	server.sin_port = htons( 49153 ); //49153 is at the beginning of the dynamic/private range of ports. It is a TCP port.
+	inet_pton(AF_INET, "10.115.20.250", &server.sin_addr);
+	status=connect(sockfd, (const struct sockaddr *) &server, sizeof(server));
+	if(status < 0){
+		perror("Connection failed. Error");
+		return 1;
+	}
+	puts("Connected\n");
 
 	//opening the socket
-	descriptor = socket(PF_INET,SOCK_STREAM, PF_INET);
+	descriptor = socket(PF_INET,SOCK_STREAM, 0); //opens the socket
+	if(descriptor == -1){
+		printf("Socket not created successfully");
+	}
+	puts("Socket created");
 
 }
