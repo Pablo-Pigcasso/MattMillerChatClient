@@ -41,13 +41,9 @@ int main(){
 	struct sockaddr_in server; //rodServer is the struct for the server I'm connecting to
 	int status;
 	int descriptor;
-	char name[7]; //allocating memory for screen name
-	char message[80], serverReply[80]; //allocating memory for message
-	/*
-	* 	char *name = malloc(80);
-	*	bzero(name,sizeof(name));
-	*	bcopy(src,dst,nchars);
-	*/
+	char name[20]; //allocating memory for screen name
+	char message[80], serverReply[500]; //allocating memory for message
+
 
 	//Opening the socket
 	descriptor = socket(PF_INET,SOCK_STREAM, 0); //opens the socket
@@ -68,30 +64,36 @@ int main(){
 		return 1;
 	}
 	puts("Connected\n");
+	sleep(1);
 
 	//Ask for username and then pass it to the server
 	puts("Enter Username:");
-	scanf("%s", name);
-	send(sockfd, name, strlen(name),0);
+	fgets(name, sizeof(name), stdin);
+	send(sockfd, name, strlen(name), 0);
+	sleep(3);
 
 	//Staying connected to the server until done.
 	while(1){
-		printf("Enter Message : ");
-		scanf("%s", message);
+		printf("Enter message or command: ");
+		fgets(message, sizeof(message), stdin);
+		sleep(1);
+		if(read(sockfd, serverReply, sizeof(serverReply)) < 0){
+			puts("Failed to get new messages\n");
+			return 1;
+		}
+		sleep(1);
+		puts(serverReply);
+		sleep(1);
 
-		//send it
+		//else send it
 		if(send(sockfd, message, strlen(message),0)<0){
 			puts("Failed to send message\n");
 			return 1;
 		}
-		//check for and receive reply
-		if(recv(sockfd, serverReply, 80, 0) < 0){
-			puts("Failed to get new messages\n");
-			return 1;
-		}
-		//
-		puts("They say");
-		puts(serverReply);
+		sleep(1);
+		memset(serverReply, 0, sizeof(serverReply));
+		memset(message, 0, sizeof(message));
+		sleep(1);
 	}
 
 	close(sockfd);
